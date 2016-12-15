@@ -182,8 +182,8 @@ def frievents():
 	username = session['username']
 	cursor = conn.cursor();
 	currtime=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-	query = 'SELECT * FROM an_event WHERE event_id in(SELECT event_id FROM sign_up WHERE username in(SELECT friend_of FROM friend WHERE friend_to=%s)) ORDER BY start_time DESC'
-	cursor.execute(query, (username))
+	query = 'SELECT * FROM an_event WHERE event_id in(SELECT event_id FROM sign_up WHERE username in(SELECT friend_of FROM friend WHERE friend_to=%s)) and datediff(start_time,%s)>=0 ORDER BY start_time DESC'
+	cursor.execute(query, (username,currtime))
 	data = cursor.fetchall()
 	cursor.close()
 	

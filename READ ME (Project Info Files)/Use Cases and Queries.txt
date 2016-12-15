@@ -56,9 +56,9 @@ See Average Ratings off All Events -
 	Gets info about events that you have signed up for and their average ratings, as well as the rating you gave them
 
 
-See Friend's Events -
-	SELECT * FROM an_event WHERE event_id in(SELECT event_id FROM sign_up WHERE username in(SELECT friend_of FROM friend WHERE friend_to=%s)) ORDER BY start_time DESC
-	Gets info on events where your friends are signed up as well
+See Upcoming Friend's Events -
+	SELECT * FROM an_event WHERE event_id in(SELECT event_id FROM sign_up WHERE username in(SELECT friend_of FROM friend WHERE friend_to=%s)) and datediff(start_time,%s)>=0 ORDER BY start_time DESC
+	Gets info on future events where your friends are signed up as well
 
 
 Additional- 
