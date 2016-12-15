@@ -1,0 +1,78 @@
+
+View Public Info -
+	SELECT * FROM an_event WHERE datediff(start_time,%s)<=3 and datediff(start_time,%s)>=0 ORDER BY start_time DESC
+	this gets info on all events in the next 3 days using timestamps
+
+	SELECT distinct category,keyword FROM about
+	this shows all current interests
+
+	SELECT distinct group_name,description FROM about,a_group WHERE category=%s and keyword=%s and about.group_id=a_group.group_id
+	this shows groups based on interest(category, keyword) given
+
+
+Login - I used sha256 for this
+	SELECT password FROM member WHERE username = %s
+	gets hashed password from user or nothing if no such user (both work fine)
+
+View Upcoming Events -
+	SELECT title,description,start_time,location_name,zipcode FROM an_event,sign_up WHERE datediff(start_time,%s)<=3 and datediff(start_time,%s)>=0 and sign_up.event_id=an_event.event_id and username=%s ORDER BY start_time DESC
+	gets event info based on time (in next 3 days) and if you have signed up for them
+
+
+Sign Up - sha256
+	SELECT * FROM member WHERE username = %s
+	Checks if such a user exists already
+
+	INSERT INTO member VALUES(%s, %s, %s, %s, %s, %s)
+	adds the user with hashed password
+
+
+Search for Events of Interest -
+	SELECT * FROM an_event WHERE event_id in(SELECT event_id FROM organize WHERE group_id in(SELECT distinct group_id FROM about WHERE category in (SELECT category FROM interested_in WHERE username=%s)and keyword in (SELECT keyword FROM interested_in WHERE username=%s)))and datediff(start_time,%s)>=0 ORDER BY start_time DESC
+	gets info on events where the eventid is in the groups that have the same interests you do
+
+
+Create Event -
+	SELECT * FROM belongs_to WHERE username=%s and authorized=1 and group_id=CAST(%s AS unsigned)
+	checks if user is authorized to make event for that group
+	
+	INSERT INTO an_event (event_id, title, description, start_time, end_time, location_name, zipcode) VALUES((SELECT MAX(event_id) FROM organize)+1, %s, %s, %s, %s, %s, CAST(%s AS unsigned))
+	Adds event to events
+
+	INSERT INTO organize (event_id, group_id) VALUES((SELECT MAX(event_id) FROM an_event), CAST(%s AS unsigned))
+	Adds what group event is associated with
+
+
+Rate Event -
+	SELECT * FROM an_event,sign_up WHERE datediff(start_time,%s)<0 and sign_up.event_id=an_event.event_id and sign_up.event_id=%s and username=%s ORDER BY start_time DESC
+	Checks if Event has passed and if you signed up for it
+
+	UPDATE sign_up SET rating=CAST(%s AS unsigned) WHERE event_id=%s and username=%s
+	changes rating to new one specified
+
+
+See Average Ratings off All Events -
+	SELECT e.event_id,title,description,start_time,location_name,zipcode,rating, (SELECT AVG(rating) FROM sign_up s WHERE e.event_id=s.event_id) "avg" FROM an_event e,sign_up WHERE datediff(start_time,%s)<0 and sign_up.event_id=e.event_id and username=%s ORDER BY start_time DESC
+	Gets info about events that you have signed up for and their average ratings, as well as the rating you gave them
+
+
+See Friend's Events -
+	SELECT * FROM an_event WHERE event_id in(SELECT event_id FROM sign_up WHERE username in(SELECT friend_of FROM friend WHERE friend_to=%s)) ORDER BY start_time DESC
+	Gets info on events where your friends are signed up as well
+
+
+Additional- 
+	SELECT * FROM an_event WHERE datediff(start_time,%s)>=0 ORDER BY start_time DESC
+	shows all upcoming events
+
+	SELECT a_group.group_id,group_name,description,authorized FROM a_group,belongs_to WHERE username=%s and belongs_to.group_id=a_group.group_id ORDER BY group_id DESC
+	shows groups you are in
+
+	SELECT ts, blog_post FROM blog WHERE username = %s ORDER BY ts DESC
+	View blog posts
+
+	INSERT INTO blog (blog_post, username) VALUES(%s, %s)
+	make blog post
+
+	SELECT AVG(rating) as "avg" FROM sign_up WHERE event_id in (SELECT an_event.event_id FROM an_event,sign_up WHERE datediff(start_time,%s)<0 and datediff(start_time,%s)>-3 and sign_up.event_id=an_event.event_id and username=%s)
+	combined rating of all events from all groups you are in in past 3 days

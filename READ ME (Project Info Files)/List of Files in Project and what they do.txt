@@ -1,0 +1,11 @@
+
+RunMe.py - Init file, run to start server
+
+In templates:
+browse.html - page for looking at events and signing up
+frievents.html - Page for looking at events of friends and signing up
+home.html - Users Homepage
+index.html - Front Page of Site when not logged in
+interests.html - Page that lets non-logged in users see groups with certain interests
+login.html - handles logins
+register.html - handles account creation

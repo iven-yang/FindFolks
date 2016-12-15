@@ -1,0 +1,8 @@
+
+Ability to post blog entries on User's Homepage
+
+Shows Average Combined Rating of All Events Hosted by Your Groups (Last 3 Days)
+
+Shows all upcoming events
+
+Shows Groups You are In
